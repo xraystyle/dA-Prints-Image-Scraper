@@ -13,7 +13,11 @@ def save_images(image_matches)
  	 				
  	 				if !File.exist?(filename)
  	 					puts "Downloading #{match[0]}..."
- 	 					img = img_agent.get(match[0])
+ 	 					begin
+ 	 						img = img_agent.get(match[0])
+ 	 					rescue => e
+ 	 						puts e
+ 	 					end
  	 					sleep(1)
  	 					img.save(filename)
  	 				end
@@ -60,7 +64,12 @@ until @a == 1
 
 	if page == nil
 
-		page = @agent.get(@prints_url)
+		begin
+			page = @agent.get(@prints_url)	
+		rescue => e
+			puts e
+		end
+		
 
 		matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
 
@@ -83,7 +92,12 @@ until @a == 1
 
 			sleep(5)
 
-			page = @agent.page.link_with(:text => 'Next').click
+			begin
+				page = @agent.page.link_with(:text => 'Next').click
+			rescue => e
+				puts e
+			end
+			
 
 			matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
 
