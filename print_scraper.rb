@@ -1,6 +1,9 @@
 require 'rubygems'
 require 'mechanize'
 
+# Functions -------------------------------------------------
+
+# Save Images from found super_img matches
 def save_images(image_matches)
 
 	img_agent = Mechanize.new
@@ -15,11 +18,14 @@ def save_images(image_matches)
  	 					puts "Downloading #{match[0]}..."
  	 					begin
  	 						img = img_agent.get(match[0])
+ 	 						img.save(filename)
+ 	 						@download_count +=1
  	 					rescue => e
  	 						puts e
+ 	 						@error_count += 1
  	 					end
- 	 					sleep(1)
- 	 					img.save(filename)
+ 	 					sleep(2)
+ 	 					
  	 				end
 
 				end
@@ -31,94 +37,154 @@ def save_images(image_matches)
 end
 
 
+# Take the input URL and get the images
 
+def fresh_prints_of_bel_air(response)
+
+	username = response	
+
+	@prints_url = "http://" + response + ".deviantart.com" + "/prints/"
+
+	@download_dir = File.expand_path('~/Desktop/downloaded_prints_images/') + "/" + username
+
+	if !File.directory?(File.expand_path(@download_dir))
+		FileUtils.mkdir_p(File.expand_path(@download_dir))
+	end
+
+	@error_count = 0
+
+	@download_count = 0
+
+	@a = 0
+
+	page = nil
+
+	@page_num = 2
+
+	until @a == 1
+
+		if page == nil
+
+			begin
+				page = @agent.get(@prints_url)	
+			rescue => e
+				puts e
+				@error_count += 1
+			end
+
+			matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
+
+			puts
+			puts "Page 1..."
+			puts matches.inspect
+			puts "Found #{matches.length} matches."
+			puts page.uri
+			puts
+
+			# sleep(3)
+
+
+			if matches
+				save_images(matches)
+			end
+			puts
+
+		else
+
+			link = @agent.page.link_with(:text => 'Next')
+
+			if link.href
+
+				# sleep(3)
+
+				begin
+					page = @agent.page.link_with(:text => 'Next').click
+				rescue => e
+					puts e
+					@error_count += 1
+				end
+				
+
+				matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
+
+				puts
+				puts "Page #{@page_num}..."
+				puts matches.inspect
+				puts "Found #{matches.length} matches."
+				puts page.uri
+				puts
+
+				if matches
+					save_images(matches)
+				end
+				puts
+				
+				@page_num += 1
+
+			else
+				@a = 1
+			end
+
+		end
+
+	end
+
+	puts "#{@download_count} images downloaded with #{@error_count} errors. \nWould you like to download prints for another user? (y/n)"
+	puts
+	print "> "
+	y_n = gets.chomp.strip.downcase
+	case y_n
+	when "y"
+		system 'clear'
+		get_username
+	else
+		done = ""
+	end
+
+end
+
+def get_username
+
+	puts "Enter the username of the user who's prints you'd like to download print images from:"
+	puts "Example: xraystyle"
+	puts
+	puts "Type 'quit' to exit the program.'"
+	puts
+	print "> "
+
+	response = gets.chomp.strip.downcase
+
+	case response
+	when "quit"
+		done = ""
+	else
+		fresh_prints_of_bel_air(response)
+	end
+
+end
+
+#End Functions --------------------------------------------------------------
+
+
+
+
+
+
+
+#Start script ***
 
 system 'clear'
 
 @agent = Mechanize.new
 
-puts "xraystyle's Prints Image Downloader"
+puts "*" * 10 + "xraystyle's Prints Image Downloader" + "*" * 10
 puts
 puts
 
-puts "Enter the URL of the user who's prints you'd like to download print images from:"
-puts "Example: http://xraystyle.deviantart.com"
+get_username
 
-response = gets.chomp.strip.downcase
-
-@prints_url = response + "/prints/"
-
-@download_dir = File.expand_path('~/Desktop/downloaded_prints_images/')
-
-if !File.directory?(File.expand_path('~/Desktop/downloaded_prints_images/'))
-	FileUtils.mkdir(File.expand_path('~/Desktop/downloaded_prints_images/'))
-end
-
-@a = 0
-
-page = nil
-
-@page_num = 2
-
-until @a == 1
-
-	if page == nil
-
-		begin
-			page = @agent.get(@prints_url)	
-		rescue => e
-			puts e
-		end
-		
-
-		matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
-
-		puts "Page 1..."
-		puts page.uri
-		puts
-
-		sleep(5)
-
-
-		if matches
-			save_images(matches)
-		end
-
-	else
-
-		link = @agent.page.link_with(:text => 'Next')
-
-		if link.href
-
-			sleep(5)
-
-			begin
-				page = @agent.page.link_with(:text => 'Next').click
-			rescue => e
-				puts e
-			end
-			
-
-			matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
-
-			puts "Page #{@page_num}..."
-			puts page.uri
-			puts
-
-			if matches
-				save_images(matches)
-			end
-			
-			@page_num += 1
-
-		else
-			@a = 1
-		end
-
-	end
-
-end
-
+puts
+puts
 puts "Done. The images are in a folder on the desktop called 'downloaded_prints_images'."
 
 
