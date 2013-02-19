@@ -81,9 +81,6 @@ def fresh_prints_of_bel_air(response)
 			puts page.uri
 			puts
 
-			# sleep(3)
-
-
 			if matches
 				save_images(matches)
 			end
@@ -95,21 +92,18 @@ def fresh_prints_of_bel_air(response)
 
 			if link.href
 
-				# sleep(3)
-
 				begin
 					page = @agent.page.link_with(:text => 'Next').click
 				rescue => e
 					puts e
 					@error_count += 1
 				end
-				
 
 				matches = page.content.scan(/super_img="(http:\/\/[\S]+)"/)
 
 				puts
 				puts "Page #{@page_num}..."
-				puts matches.inspect
+				# puts matches.inspect
 				puts "Found #{matches.length} matches."
 				puts page.uri
 				puts
