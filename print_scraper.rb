@@ -1,41 +1,28 @@
 require 'rubygems'
 require 'mechanize'
 
-# Functions -------------------------------------------------
+# Methods -------------------------------------------------
 
-# Save Images from found super_img matches
-def save_images(image_matches)
+# Self-explanatory
+def get_username
 
-	img_agent = Mechanize.new
-	image_matches.each do |match|
-		match.each do |item|
-			basename = item.scan(/\/{1}([^\/]+$)/)
-			basename.each do |a|
-				a.each do |b|
- 	 				filename = @download_dir.to_s + "/" + b
- 	 				
- 	 				if !File.exist?(filename)
- 	 					puts "Downloading #{match[0]}..."
- 	 					begin
- 	 						img = img_agent.get(match[0])
- 	 						img.save(filename)
- 	 						@download_count +=1
- 	 					rescue => e
- 	 						puts e
- 	 						@error_count += 1
- 	 					end
- 	 					sleep(2)
- 	 					
- 	 				end
+	puts "Enter the username of the user who's prints you'd like to download print images from:"
+	puts "Example: xraystyle"
+	puts
+	puts "Type 'quit' to exit the program.'"
+	puts
+	print "> "
 
-				end
-			end
-		end
+	response = gets.chomp.strip.downcase
 
+	case response
+	when "quit"
+		done = ""
+	else
+		fresh_prints_of_bel_air(response)
 	end
 
 end
-
 
 # Take the input URL and get the images
 
@@ -43,7 +30,7 @@ def fresh_prints_of_bel_air(response)
 
 	username = response	
 
-	@prints_url = "http://" + response + ".deviantart.com" + "/prints/"
+	@prints_url = "http://" + response + ".deviantart.com/prints/"
 
 	@download_dir = File.expand_path('~/Desktop/downloaded_prints_images/') + "/" + username
 
@@ -55,13 +42,13 @@ def fresh_prints_of_bel_air(response)
 
 	@download_count = 0
 
-	@a = 0
+	@another_page = true
 
 	page = nil
 
 	@page_num = 2
 
-	until @a == 1
+	until @another_page == false  # Keep moving until last page.
 
 		if page == nil
 
@@ -116,7 +103,7 @@ def fresh_prints_of_bel_air(response)
 				@page_num += 1
 
 			else
-				@a = 1
+				@another_page = false
 			end
 
 		end
@@ -137,27 +124,41 @@ def fresh_prints_of_bel_air(response)
 
 end
 
-def get_username
+# Save Images from found super_img matches
+def save_images(image_matches)
 
-	puts "Enter the username of the user who's prints you'd like to download print images from:"
-	puts "Example: xraystyle"
-	puts
-	puts "Type 'quit' to exit the program.'"
-	puts
-	print "> "
+	img_agent = Mechanize.new
+	image_matches.each do |match|
+		match.each do |item|
+			basename = item.scan(/\/{1}([^\/]+$)/)
+			basename.each do |a|
+				a.each do |b|
+ 	 				filename = @download_dir.to_s + "/" + b
+ 	 				
+ 	 				if !File.exist?(filename)
+ 	 					puts "Downloading #{match[0]}..."
+ 	 					begin
+ 	 						img = img_agent.get(match[0])
+ 	 						img.save(filename)
+ 	 						@download_count +=1
+ 	 					rescue => e
+ 	 						puts e
+ 	 						@error_count += 1
+ 	 					end
+ 	 					sleep(2)
+ 	 					
+ 	 				end
 
-	response = gets.chomp.strip.downcase
+				end
+			end
+		end
 
-	case response
-	when "quit"
-		done = ""
-	else
-		fresh_prints_of_bel_air(response)
 	end
 
 end
 
-#End Functions --------------------------------------------------------------
+
+#End Methods --------------------------------------------------------------
 
 
 
