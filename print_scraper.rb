@@ -77,7 +77,7 @@ def fresh_prints_of_bel_air(response)
 
 			link = @agent.page.link_with(:text => 'Next')
 
-			if link.href
+			if link.href # If we have an href there's more pages to go.
 
 				begin
 					page = @agent.page.link_with(:text => 'Next').click
@@ -90,7 +90,6 @@ def fresh_prints_of_bel_air(response)
 
 				puts
 				puts "Page #{@page_num}..."
-				# puts matches.inspect
 				puts "Found #{matches.length} matches."
 				puts page.uri
 				puts
@@ -103,7 +102,7 @@ def fresh_prints_of_bel_air(response)
 				@page_num += 1
 
 			else
-				@another_page = false
+				@another_page = false # No href? No more pages. 
 			end
 
 		end
@@ -159,11 +158,6 @@ end
 
 
 #End Methods --------------------------------------------------------------
-
-
-
-
-
 
 
 #Start script ***
